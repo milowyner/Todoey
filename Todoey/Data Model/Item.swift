@@ -10,6 +10,7 @@ import Foundation
 import RealmSwift
 
 class Item: Object {
-    @objc dynamic let title: String = ""
+    @objc dynamic var title: String = ""
     @objc dynamic var done: Bool = false
+    @objc dynamic var parentCategory: Category?
 }

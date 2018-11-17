@@ -45,6 +45,9 @@ class CategoryViewController: UITableViewController {
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categoryArray[indexPath.row]
         }
+        else {
+            print("Error, no selected index path")
+        }
         
     }
     
@@ -88,7 +91,7 @@ class CategoryViewController: UITableViewController {
                     }
                 }
                 catch {
-                    print("Error writing to Realm database, \(error)")
+                    print("Error saving category, \(error)")
                 }
                 self.tableView.reloadData()
             }
