@@ -8,11 +8,11 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    var categoryArray = [Category]()
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var categoryArray: Results<Category>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,19 +51,16 @@ class CategoryViewController: UITableViewController {
     // MARK: - Data Manipulation Methods
     
     func saveCategories() {
-        do {
-            try context.save()
-        } catch {
-            print("Error saving category, \(error)")
-        }
         tableView.reloadData()
     }
     
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
+    func loadCategories() {
         do {
-            categoryArray = try context.fetch(request)
-        } catch {
-            print("Error fetching category, \(error)")
+            let realm = try Realm()
+            categoryArray = realm.objects(Category.self)
+        }
+        catch {
+            print("Error initializing Realm, \(error)")
         }
         tableView.reloadData()
     }
@@ -81,11 +78,19 @@ class CategoryViewController: UITableViewController {
             let textField = alert.textFields![0]
             if textField.text != "" {
                 
-                let newCategory = Category(context: self.context)
+                let newCategory = Category()
                 newCategory.name = textField.text!
                 
-                self.categoryArray.append(newCategory)
-                self.saveCategories()
+                do {
+                    let realm = try Realm()
+                    try realm.write {
+                        realm.add(newCategory)
+                    }
+                }
+                catch {
+                    print("Error writing to Realm database, \(error)")
+                }
+                self.tableView.reloadData()
             }
         }
         alert.addAction(action)

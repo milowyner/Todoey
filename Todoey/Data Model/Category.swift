@@ -10,5 +10,5 @@ import Foundation
 import RealmSwift
 
 class Category: Object {
-    @objc dynamic let name: String = ""
+    @objc dynamic var name: String = ""
 }
