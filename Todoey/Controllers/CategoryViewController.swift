@@ -12,7 +12,8 @@ import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    var categoryArray: Results<Category>!
+    let realm = try! Realm()
+    var categoryArray: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,13 +23,13 @@ class CategoryViewController: UITableViewController {
     // MARK: - TableView Datasource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        return categoryArray?.count ?? 0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
         
-        cell.textLabel?.text = categoryArray[indexPath.row].name
+        cell.textLabel?.text = categoryArray?[indexPath.row].name
         
         return cell
     }
@@ -36,35 +37,32 @@ class CategoryViewController: UITableViewController {
     //MARK: - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //create new todo list controller
         performSegue(withIdentifier: "goToItems", sender: self)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! TodoListViewController
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categoryArray?[indexPath.row]
         }
-        else {
-            print("Error, no selected index path")
-        }
-        
     }
     
     // MARK: - Data Manipulation Methods
     
-    func saveCategories() {
+    func save(category: Category) {
+        do {
+            try realm.write {
+                realm.add(category)
+            }
+        }
+        catch {
+            print("Error saving category, \(error)")
+        }
         tableView.reloadData()
     }
     
     func loadCategories() {
-        do {
-            let realm = try Realm()
-            categoryArray = realm.objects(Category.self)
-        }
-        catch {
-            print("Error initializing Realm, \(error)")
-        }
+        categoryArray = realm.objects(Category.self)
         tableView.reloadData()
     }
     
@@ -84,16 +82,7 @@ class CategoryViewController: UITableViewController {
                 let newCategory = Category()
                 newCategory.name = textField.text!
                 
-                do {
-                    let realm = try Realm()
-                    try realm.write {
-                        realm.add(newCategory)
-                    }
-                }
-                catch {
-                    print("Error saving category, \(error)")
-                }
-                self.tableView.reloadData()
+                self.save(category: newCategory)
             }
         }
         alert.addAction(action)
