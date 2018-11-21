@@ -37,6 +37,7 @@ class TodoListViewController: SwipeTableViewController {
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
+            cell.backgroundColor = UIColor(hexString: item.color)
         }
         
         return cell
@@ -76,6 +77,8 @@ class TodoListViewController: SwipeTableViewController {
                         try self.realm.write {
                             let newItem = Item()
                             newItem.title = textField.text!
+                            newItem.color = UIColor.randomFlat.hexValue()
+                            
                             currentCategory.items.append(newItem)
                         }
                     }
