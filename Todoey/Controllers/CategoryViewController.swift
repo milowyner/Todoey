@@ -65,7 +65,7 @@ class CategoryViewController: SwipeTableViewController {
         tableView.reloadData()
     }
     
-    //MARK: - Delete Data From Swipe
+    //MARK: - Delete Category From Swipe
     
     override func updateModel(at indexPath: IndexPath) {
         if let category = self.categories?[indexPath.row] {
