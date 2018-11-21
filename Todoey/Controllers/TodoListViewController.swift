@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
 
@@ -19,9 +20,28 @@ class TodoListViewController: SwipeTableViewController {
         }
     }
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     override func viewDidLoad() {
-        super.viewDidLoad()        
-        self.title = selectedCategory?.name
+        super.viewDidLoad()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation bar does not exist")}
+
+        guard let colorHex = selectedCategory?.color else {fatalError()}
+        guard let color = UIColor(hexString: colorHex) else {fatalError()}
+        
+        searchBar.barTintColor = color
+        navBar.barTintColor = color
+        navBar.tintColor = ContrastColorOf(color, returnFlat: true)
+        navBar.largeTitleTextAttributes = [.foregroundColor: ContrastColorOf(color, returnFlat: true)]
+        
+        // Removes border around search bar
+        searchBar.layer.borderWidth = 1
+        searchBar.layer.borderColor = color.cgColor
+        
+        title = selectedCategory!.name
     }
 
     
@@ -37,7 +57,11 @@ class TodoListViewController: SwipeTableViewController {
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
-            cell.backgroundColor = UIColor(hexString: item.color)
+            
+            if let color = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(todoItems!.count) / 2) {
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn: color, isFlat: true)
+            }
         }
         
         return cell

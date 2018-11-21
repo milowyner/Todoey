@@ -19,6 +19,18 @@ class CategoryViewController: SwipeTableViewController {
         super.viewDidLoad()
         loadCategories()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation bar does not exist")}
+        let color = FlatSkyBlue()
+        
+        navBar.barTintColor = color
+        navBar.tintColor = ContrastColorOf(color, returnFlat: true)
+        navBar.largeTitleTextAttributes = [.foregroundColor: ContrastColorOf(color, returnFlat: true)]
+        
+        // Removes border below nav bar
+        navBar.shadowImage = UIImage()
+    }
 
     // MARK: - TableView Datasource Methods
     
@@ -32,6 +44,7 @@ class CategoryViewController: SwipeTableViewController {
         if let category = categories?[indexPath.row] {
             cell.textLabel?.text = category.name
             cell.backgroundColor = UIColor(hexString: category.color)
+            cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn: cell.backgroundColor!, isFlat: true)
         }
         return cell
     }
@@ -40,6 +53,7 @@ class CategoryViewController: SwipeTableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -98,7 +112,8 @@ class CategoryViewController: SwipeTableViewController {
                 
                 let newCategory = Category()
                 newCategory.name = textField.text!
-                newCategory.color = UIColor.randomFlat.hexValue()
+                let color = UIColor(randomFlatColorOf: UIShadeStyle.light)
+                newCategory.color = color.hexValue()
                 
                 self.save(category: newCategory)
             }
